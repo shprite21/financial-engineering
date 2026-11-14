@@ -1,452 +1,142 @@
 # Regime-Aware Systematic Equities Trading Platform
 
-A research-grade quantitative trading and portfolio management framework focused on adaptive multi-strategy systematic equities trading across changing market regimes.
+**Systematic equities research, portfolio construction, and strategy validation.**
 
-This platform combines regime detection, alpha generation, portfolio optimization, risk management, realistic backtesting, analytics, and visualization into a unified research-to-execution pipeline.
+## Research workflows
 
-The platform includes a synthetic portfolio research workflow and a historical equities and ETF experiment. The historical experiment fits a Gaussian HMM and uses its regime labels to allocate among momentum, mean reversion, and pairs trading. [Experiment guide](experiments/README.md) · [Published figures](outputs/figures/) · [Research notebooks](notebooks/)
+| Workflow | What you can run | Entry point |
+| --- | --- | --- |
+| Q terminal | Build a hypothesis, simulate trades, test portfolio allocations and review validation evidence. | [Local setup](#run-locally) |
+| Portfolio research library | Run the synthetic multi-strategy study or replay a custom equity portfolio through the local API and dashboard. | [Engine guide](apps/engine/PLATFORM.md) · [Dashboard](apps/engine/apps/portfolio_dashboard/README.md) |
+| Historical HMM experiment | Fit market regimes, allocate across momentum, mean reversion and pairs strategies, and examine portfolio attribution. | [Run the experiment](apps/engine/experiments/README.md) · [Notebooks](apps/engine/notebooks/) · [Figures](apps/engine/outputs/figures/) |
+| Factor research lab | Replicate equity factors, evaluate information coefficients and decile spreads, and construct portfolios. | [Factor lab, API and dashboard](factor-lab/README.md) |
 
-The system is designed to resemble institutional systematic equities research infrastructure while remaining readable enough for research portfolios, MFE applications, and quant developer interviews.
+Q is a local research environment for developing market hypotheses, constructing portfolios, testing strategies, and reviewing the evidence behind an allocation decision. It brings a Python research engine, a TypeScript daily backtester, and a common terminal interface into one repository.
 
-## Overview
+The research process centers on explicit data provenance, chronological evaluation, transaction costs, immutable experiment records, and independent accounting checks. Q is under active development. Broker adapters provide read-only account access; live order submission is disabled.
 
-Modern systematic equity strategies rarely rely on a single signal.
+## Research framework
 
-Professional quantitative platforms combine multiple weak-but-persistent alpha sources and dynamically allocate capital depending on the prevailing market environment. This project implements a modular regime-aware architecture capable of:
+| Area | Implemented scope |
+| --- | --- |
+| Strategy research | Momentum, mean reversion, trend, breakout, event-driven and sector strategies; pairs and cointegration libraries with workflow-specific restrictions. |
+| Regime analysis | Trend, volatility, breadth and ensemble models; HMM research with explicit calibration and provenance requirements. |
+| Portfolio construction | Equal and inverse-volatility weights, risk-parity and constrained-allocation libraries, exposure limits, and historical allocation replay. |
+| Backtesting | Daily next-open share accounting, lagged portfolio-return accounting, and separate bar/event simulation engines. |
+| Validation | Chronological walk-forward evaluation, parameter and cost sensitivity, benchmark and factor diagnostics, and an 18-layer Strategy Survival pipeline. |
+| Research records | Frozen inputs, source/configuration fingerprints, versioned hypotheses, experiment comparisons, saved artifacts and decision history. |
+| Advanced studies | Cointegration, option pricing and Greeks, hedging, regime models, and explicitly synthetic market-making/latency scenarios. |
 
-- detecting market regimes
-- generating diversified alpha from independent strategy families
-- dynamically weighting strategies and assets
-- managing portfolio risk through execution-aware controls
-- performing realistic portfolio-level backtests
-- analyzing performance robustness across regimes
-- producing professional research visualizations
+Capabilities differ across engines and interfaces. Python library availability does not imply a validated real-data terminal workflow. In particular, the retained full-library synthetic scenario selects pairs on its complete sample: its output is an in-sample diagnostic, not out-of-sample evidence.
 
-The core research motivation is simple:
+## Research methodology
 
-> Markets are non-stationary. Different strategies perform differently across different environments.
+A typical study proceeds from a written hypothesis to a specified universe, source, price convention, signal, portfolio rule and cost model. Historical evaluation then separates development and holdout periods, examines sensitivity to assumptions, and retains both favorable and negative results.
 
-Instead of relying on a static trading system, this platform adapts exposure and allocation based on market structure, volatility, breadth, trend, and strategy performance.
+- **Chronology:** signals use information available at the decision time. The terminal daily engine fills no earlier than the next eligible supplied bar; portfolio engines use lagged exposures.
+- **Accounting:** share-based simulations enforce available cash and whole-share rounding. Fractional portfolio-weight research is a separate model. Fees, slippage, corporate actions and benchmark conventions are reported by engine.
+- **Provenance:** dataset versions and strategy/configuration identities accompany results. Editing a strategy does not rewrite historical snapshots.
+- **Validation:** the Strategy Survival pipeline exposes integrity failures, statistical diagnostics, warnings and unmet prerequisites individually. It does not collapse them into an opaque score or authorize execution.
+- **Reproducibility:** synthetic scenarios are explicitly selected and seeded. Provider failures remain failures; synthetic data is never substituted silently.
 
-## Core Features
+### Accounting boundaries
 
-### Regime Detection Engine
+| Engine / workflow | Convention |
+| --- | --- |
+| Terminal daily backtests | Raw OHLC, next-open whole-share fills, cash constraints, per-side costs, splits and dividend receivables. |
+| Portfolio research | Lagged portfolio weights, fractional exposures, configurable allocation/risk rules and transaction costs. |
+| Allocation replay | Historical weighted allocation using provider-specific adjusted prices; research allocations are not broker orders. |
+| Strict daily research | Explicit sessions and data availability, raw prices, effective-dated costs and a corporate-action ledger. |
+| Bar lab | Adjusted provider bars or seeded synthetic bars, independent period warm-up/cash, next observed open and prior-volume participation. |
+| Market-making studies | Seeded event, queue and latency simulations with modeled fills and inventory constraints. |
 
-Detects market states using statistical and machine learning methods:
+Results across these engines are comparable only after reconciling price basis, currency, dividends, costs, timing and sizing. See [data conventions](docs/real-market-data.md) and [validation methodology](docs/strategy-survival.md).
 
-- Hidden Markov Models
-- volatility regime classification
-- trend filters
-- market breadth analysis
-- macro risk regime detection
-- ensemble regime voting
-- risk-on/risk-off style regime scoring
-
-Supported regime concepts include:
-
-- trending bull markets
-- trending bear markets
-- high-volatility markets
-- low-volatility markets
-- sideways or choppy markets
-- crisis-style defensive regimes
-
-### Multi-Strategy Alpha Library
-
-The platform combines structurally different strategies designed to perform under different market environments.
-
-Trend and momentum:
-
-- cross-sectional momentum
-- time-series momentum
-- volatility breakout systems
-- moving-average-style trend filters
-
-Mean reversion:
-
-- RSI reversal
-- Bollinger Band reversal
-- short-term z-score mean reversion
-- short-term reversal systems
-
-Volatility systems:
-
-- volatility expansion breakouts
-- ATR-based breakout systems
-- volatility compression setups
-- realized-volatility scaled signals
-
-Event-driven:
-
-- post-earnings announcement drift
-- gap continuation and reversal
-- earnings momentum
-- configurable earnings surprise panel support
-- event signal persistence windows
-
-Relative strength and rotation:
-
-- sector rotation
-- relative strength ranking
-- breadth-aware allocation inputs
-
-Statistical arbitrage:
-
-- pairs trading
-- cointegration pair selection
-- rolling beta spread construction
-- z-score mean reversion
-
-Each strategy produces a standardized `StrategySignal` with target weights, optional scores, and metadata. This keeps research components composable and easy to evaluate independently.
-
-### Adaptive Allocation Engine
-
-Capital can be dynamically allocated using:
-
-- inverse volatility weighting
-- risk parity
-- regime-conditioned weights
-- rolling Sharpe weighting
-- constrained mean-variance optimization
-- target gross exposure and per-asset limits
-
-Allocation can adapt based on:
-
-- detected regime
-- rolling strategy performance
-- volatility targets
-- drawdown constraints
-- correlation and covariance structure
-- confidence scores from strategy outputs
-
-### Risk Management
-
-Professional risk controls are integrated throughout the framework:
-
-- volatility targeting
-- stop-loss systems
-- trailing exits
-- asset exposure caps
-- gross and net leverage constraints
-- drawdown monitoring
-- transaction cost modeling
-- slippage simulation
-- execution-lag handling
-
-### Data Pipeline
-
-The platform supports:
-
-- OHLCV market data
-- yfinance ingestion
-- CSV-based local data ingestion
-- sector ETF data
-- volatility index data
-- macro indicator panels
-- feature engineering for returns, momentum, volatility, liquidity, beta, drawdown, relative strength, and cross-sectional ranks
-
-### Backtesting Engine
-
-Supports:
-
-- vectorized backtesting
-- event-driven simulation through sparse signal events
-- portfolio-level testing
-- multi-strategy evaluation
-- walk-forward testing
-- rolling retraining
-- expanding and rolling train/test windows
-- train/test regime separation diagnostics
-- out-of-sample stability metrics
-- realistic execution assumptions
-- transaction costs and slippage
-- performance attribution
-
-### Research Analytics
-
-Includes:
-
-- benchmark comparison against SPY proxy, equal-weight, buy-and-hold, momentum-only, and risk parity benchmarks
-- Sharpe ratio
-- Sortino ratio
-- Calmar ratio
-- max drawdown
-- rolling Sharpe
-- rolling returns
-- turnover analysis
-- exposure analysis
-- factor decomposition
-- factor exposure drift diagnostics
-- strategy correlation and clustering
-- parameter robustness testing
-- transaction cost sensitivity analysis
-- regime transition analytics
-- hit rate
-- skew and kurtosis
-- regime-wise performance breakdown
-- strategy and asset contribution analysis
-
-### Visualization Suite
-
-Generates professional quantitative research plots:
-
-- equity curves
-- drawdown charts
-- rolling Sharpe ratio
-- regime overlays
-- regime timelines
-- allocation heatmaps
-- strategy contribution charts
-- rolling correlations
-- factor exposure plots
-- volatility regime maps
-- advanced self-contained HTML research reports
-
-## Tech Stack
-
-Primary language:
-
-- Python
-
-Core libraries:
-
-- pandas
-- numpy
-- scipy
-- scikit-learn
-- statsmodels
-- hmmlearn
-- matplotlib
-- plotly
-- yfinance
-- cvxpy
-- PyYAML
-
-Planned extensions:
-
-- C++ performance modules
-- `backtesting.py` adapters
-- distributed backtesting
-- GPU acceleration
-
-## Repository Structure
+## Architecture
 
 ```text
 01-Regime-Aware-Systematic-Equities-Trading-Platform/
-|
-+-- data/               Data ingestion, validation, market data containers, feature engineering
-+-- strategies/         Modular alpha strategy library
-+-- regime_detection/   HMM, volatility, trend, breadth, and ensemble regime detectors
-+-- portfolio/          Allocation, risk parity, Sharpe weighting, constrained optimization
-+-- risk/               Risk controls, transaction costs, slippage, drawdown monitors
-+-- execution/          Order, fill, commission, slippage, and participation simulation
-+-- backtesting/        Vectorized backtester, walk-forward evaluation, attribution
-+-- analytics/          Performance metrics and report assembly
-+-- visualization/      Plotly and Matplotlib research plots
-+-- research/           End-to-end research pipeline orchestration
-+-- configs/            Config-driven experiment templates
-+-- experiments/        Historical HMM backtest, configuration, and methodology
-+-- src/                HMM experiment strategies, allocator, backtester, and analytics
-+-- notebooks/          Four notebooks for exploring the historical experiment
-+-- outputs/figures/    Published charts from the historical experiment
-+-- scripts/            Runnable research examples
-+-- tests/              Unit tests for core contracts
-+-- pyproject.toml      Package metadata and dependencies
-+-- README.md
+├── apps/
+│   ├── engine/          Python research, portfolio, validation and simulation
+│   │   ├── data/        Providers, normalized containers and quality checks
+│   │   ├── strategies/  Modular signal families
+│   │   ├── backtesting/ Historical accounting and walk-forward evaluation
+│   │   ├── portfolio/   Allocation and portfolio construction
+│   │   ├── research/    Experiments, robustness and survival validation
+│   │   ├── qresearch/   Integrated advanced research modules
+│   │   ├── evidence/    Versioned studies and bar/event simulations
+│   │   └── tests/       Numerical, chronology and service tests
+│   ├── gateway/         Local data, compute and integration boundaries
+│   └── web/             React/TypeScript terminal and daily quant engine
+├── docs/                Methodology, architecture and operating instructions
+├── factor-lab/          Cross-sectional factors, portfolio construction and paper replication
+├── setup-flagship.ps1    Locked Python environment setup
+└── start-q21.ps1         Local terminal launcher
 ```
 
-## Quick Start
+The browser presents research state. A loopback Node gateway handles provider access and bounded daily-backtest workers; an authenticated Python service starts on demand and shares a bounded research executor. Local datasets and artifacts live under `.data/`, outside source control. Broker access and account simulation remain separate from research calculations.
 
-From the `quant-research` repository root, install both workflows using Python 3.11 or later.
+The web application uses React, TypeScript, Tailwind and Vinext. The Python engine uses NumPy, pandas, SciPy, statsmodels, scikit-learn, CVXPY and related research libraries. The Sites hosting manifest and Vite plugin are retained; a hosted web build does not provision the local Python/gateway services.
 
-```bash
-cd 01-Regime-Aware-Systematic-Equities-Trading-Platform
-python -m pip install -e ".[dev]"
+## Data and scope
+
+Q supports explicit Yahoo, Massive, CSV and synthetic inputs where the selected workflow allows them. Massive integration currently requests US daily history within a two-year window. NSE history can be imported explicitly. Provider-specific adjustment conventions are preserved: terminal Massive backtests account for raw-price splits and dividend receivables, while Python Massive views use split-adjusted prices and exclude cash dividends.
+
+Synthetic prices, order books, option flows and latency scenarios are research fixtures. They are not observed market data or evidence of executable performance. Complete historical constituents, delisted coverage, point-in-time fundamentals, production session controls and broker-grade reconciliation remain limitations. Current exchange catalogues are not historical universe membership.
+
+## Run locally
+
+Prerequisites: **Node.js 24+**, npm, **Python 3.12+**, Git and PowerShell for the supplied launchers. A fresh clone contains source and fixtures, not a preinstalled environment or private research history.
+
+```powershell
+git clone https://github.com/shprite21/financial-engineering.git
+cd financial-engineering/01-Regime-Aware-Systematic-Equities-Trading-Platform
+cd apps/web
+npm run install:ci
+cd ../..
+./setup-flagship.ps1 -Python python
+./start-q21.ps1
 ```
 
-Run the platform on synthetic data.
+Open `http://127.0.0.1:5173`. The gateway listens on loopback port 5174 and starts Python when research is requested. Select a synthetic source explicitly to explore supported scenarios without market-data credentials. Paid-provider access, Codex conversations and read-only broker connections require their own setup; see [connections](docs/connections.md).
 
-```bash
-python scripts/run_research.py
+For an offline Python library diagnostic after setup:
+
+```powershell
+./apps/engine/.venv/Scripts/python.exe apps/engine/scripts/run_research.py
 ```
 
-Open the resulting report at `reports/research_report.html`.
+This writes generated research reports under `apps/engine/reports/` and experiment records under `apps/engine/outputs/`. It is the synthetic full-library scenario described above; its headline results must not be presented as investable or out-of-sample performance.
 
-To run the historical HMM experiment with Yahoo Finance data, use the following command from the same directory.
+## Validation
 
-```bash
-python experiments/run_experiment.py
+From `apps/web`:
+
+```sh
+node --test tests/*.test.mjs
+npx tsc --noEmit --incremental false
+npm run build
 ```
 
-This writes daily results and performance metrics to `outputs/reports/` and regenerates the charts in `outputs/figures/`. The ticker universe, date range, and strategy settings are in [the experiment configuration](experiments/config.yaml).
+From this project directory after Python setup:
 
-Run both test suites together.
-
-```bash
-python -m pytest
+```powershell
+./apps/engine/.venv/Scripts/python.exe -m pytest apps/engine
+node --test apps/gateway/tests/*.test.mjs
 ```
 
-## Example Workflow
+The suites cover temporal leakage, cash/share reconciliation, costs, corporate actions, deterministic fixtures, artifact preservation and service boundaries. Runtime gateway tests launch the local Python service. The superseded standalone Streamlit UI suite is excluded by the engine's pytest configuration.
 
-```python
-from analytics.tearsheet import PerformanceReport
-from backtesting import VectorizedBacktester
-from data.features import FeatureEngineer
-from portfolio import RegimeConditionedAllocator
-from regime_detection import RegimeEnsemble, VolatilityRegimeClassifier
-from strategies.library import StrategyPipeline
+## Repository scope
 
-# 1. Load or ingest market data
-bundle = load_market_data()
+The public repository contains implementation source, required assets, numerical tests, small documented fixtures, dependency locks, source provenance, and reproducibility instructions. Provider downloads, account records, strategy-development workspaces, credentials, local databases, generated reports, dependency installations, caches, internal design prompts and machine-specific acceptance records remain local and ignored.
 
-# 2. Engineer features
-features = FeatureEngineer().build(bundle)
+Q is the active system. `q21`, `flagship` and `evidence` identifiers remain for stored-data and import compatibility. Earlier projects are preserved as research origins:
 
-# 3. Detect market regimes
-volatility_regime = VolatilityRegimeClassifier().fit_predict(bundle.returns())
-regimes = RegimeEnsemble().combine({"volatility": volatility_regime})
+- [Financial Engineering portfolio](../README.md)
+- [Regime-Aware Systematic Equities Trading Platform](https://github.com/shprite21/Regime-Aware-Systematic-Equities-Trading-Platform)
+- [Systematic Equities Research Lab](factor-lab/README.md)
 
-# 4. Generate independent strategy signals
-signals = StrategyPipeline(strategies).generate(bundle)
-blended_signal = StrategyPipeline.equal_weight_blend(signals)
+Further documentation: [architecture](docs/implementation.md), [operation and workflow map](docs/flagship.md), [advanced research integration](docs/q-research-integration.md), and [Strategy Survival](docs/strategy-survival.md).
 
-# 5. Allocate capital dynamically
-weights = RegimeConditionedAllocator().allocate(blended_signal.weights, regimes.labels)
-
-# 6. Run portfolio backtest
-result = VectorizedBacktester().run(bundle.close(), weights.weights)
-
-# 7. Analyze performance
-report = PerformanceReport.from_backtest(result, regimes.labels)
-print(report.metrics_frame())
-```
-
-## Current Development Status
-
-Implemented:
-
-- core data containers and ingestion interfaces
-- feature engineering pipeline
-- HMM-style regime detection with fallback support
-- volatility, trend, breadth, macro risk, and ensemble regime detectors
-- professional data quality validation
-- cross-sectional momentum
-- time-series momentum
-- moving average trend following
-- mean reversion
-- short-term reversal
-- Bollinger Band reversal
-- RSI reversal
-- volatility breakout
-- ATR breakout
-- volatility compression
-- PEAD signal support
-- gap continuation and reversal
-- earnings momentum
-- sector rotation
-- pairs trading
-- cointegration pairs
-- inverse volatility allocation
-- risk parity
-- rolling Sharpe allocation
-- regime-conditioned allocation
-- constrained optimization
-- volatility targeting
-- stop-loss and trailing-stop systems
-- transaction cost and slippage models
-- execution simulator with orders and fills
-- vectorized backtesting
-- event-driven backtesting wrapper
-- walk-forward evaluation
-- institutional walk-forward validator with train/test windows
-- rolling retraining evaluator
-- benchmark comparison engine
-- strategy correlation and clustering analytics
-- factor exposure analytics
-- regime transition analytics
-- transaction cost sensitivity analysis
-- parameter robustness testing
-- experiment tracking
-- performance attribution
-- expanded attribution by strategy, asset, sector, factor, and regime
-- exposure analysis
-- factor decomposition
-- rolling correlation analytics
-- analytics tear sheet object
-- advanced HTML research report builder
-- visualization utilities
-- research pipeline orchestration
-- synthetic end-to-end research script
-- unit tests for core contracts
-
-## Roadmap
-
-Phase 1:
-
-- core backtesting engine
-- momentum strategies
-- mean reversion strategies
-- regime detection pipeline
-- config-driven synthetic research workflow
-
-Phase 2:
-
-- adaptive portfolio allocation
-- PEAD research dataset integration
-- advanced analytics dashboard
-- sector neutrality constraints
-
-Phase 3:
-
-- reinforcement learning allocation overlays
-- factor modeling
-- Bayesian optimization
-- intraday execution simulation
-- live paper trading integration
-- distributed backtesting
-- GPU acceleration
-
-## Applications
-
-This project is designed for:
-
-- quantitative research
-- systematic equities trading
-- portfolio construction research
-- MFE applications
-- quant developer roles
-- quant research internships
-- systematic trading experimentation
-- GitHub showcase portfolios
-
-## Design Principles
-
-The codebase is intentionally modular.
-
-Every strategy produces a `StrategySignal`, regime detectors return a `RegimeResult`, allocators expose target portfolio weights, and the backtesting engine consumes price panels plus target weights. This keeps experimentation reproducible while allowing research components to be swapped independently.
-
-The goal is not to create a single monolithic trading strategy. The goal is to create reusable research infrastructure for testing how strategy families behave across market regimes.
-
-## Disclaimer
-
-This project is for educational and research purposes only.
-
-It is not financial advice and should not be used for live trading without extensive validation, independent review, market impact analysis, operational monitoring, and robust risk controls.
-
-## References And Inspiration
-
-Inspired by concepts from:
-
-- systematic equities trading
-- statistical arbitrage
-- adaptive asset allocation
-- factor investing
-- quantitative portfolio management
-- regime-switching models
-- volatility targeting frameworks
-- institutional portfolio construction
-
-## Author
-
-Arnaav Raj  
-Information Science Undergraduate | Quantitative Finance Research | Systematic Equities and Regime-Aware Trading Systems
+**Author:** Arnaav Raj. Research software; results depend on data and modeling assumptions and are not investment recommendations. Live execution remains disabled pending deterministic risk, compliance, settlement, reconciliation and approval services.
