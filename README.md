@@ -19,7 +19,6 @@ The repository is organized as a portfolio of independent projects. Each folder 
 | 9 | [Systematic Equities Research Lab](./systematic-equities-research-lab/) | Equity factor replication, portfolio construction, and walk-forward evaluation. | `python main.py --periods 756`, `streamlit run dashboards/streamlit_app.py` |
 | 10 | [Q Quantitative Research Terminal](./terminal/) | A local terminal for equity research, portfolio backtesting, and strategy validation. | `.\setup-flagship.ps1`, `.\start-q21.ps1` |
 | 11 | [Competitive Market Intelligence Dashboard](./competitive-market-intelligence-dashboard/) | Competitor research, company filings, market prices, and news in a Streamlit dashboard. | `python run.py` |
-| 12 | [Evidence Backtester site](./shprite21.github.io/) | Static page for the Evidence Backtester project. | [index.html](./shprite21.github.io/index.html) |
 
 ## Core Topics
 
@@ -55,7 +54,6 @@ quant-research/
 |-- systematic-equities-research-lab/
 |-- terminal/
 |-- competitive-market-intelligence-dashboard/
-|-- shprite21.github.io/
 `-- README.md
 ```
 
