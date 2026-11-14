@@ -14,6 +14,11 @@ The repository is organized as a portfolio of independent projects. Each folder 
 | 4 | [Quantitative Finance Modeling](./04-quant-finance-modeling/) | Monte Carlo risk simulation, mean-variance portfolio optimization, and ARIMA forecasting notebooks. | Project notebooks |
 | 5 | [ML Regime Trend Prediction](./05-ml-regime-trend-prediction/) | NIFTY 50 data pipeline, technical indicators, market regimes, model comparison, and Streamlit dashboard. | `python market_regime_detection.py`, `python launch_dashboard.py` |
 | 6 | [Systematic Futures and Options Venture](./student%20systematic%20futures%20and%20options%20venture/) | End-to-end Indian index derivatives research workflow with data loading, features, regime detection, signals, strategy selection, risk management, and walk-forward testing. | `pytest -q`, notebooks |
+| 7 | [Multi-Asset Risk Simulation & Stress Testing Engine](./multi_asset_risk_simulation/) | Monte Carlo simulation and stress testing for multi-asset portfolios. | `python -m risk_engine.main --config config/default_config.json` |
+| 8 | [Shprite Equity Lab](./shprite-equity-lab/) | Regime-aware portfolio research with a local API and interactive portfolio dashboard. | `python scripts/run_research.py`, `.\scripts\run_dashboard.ps1` |
+| 9 | [Systematic Equities Research Lab](./systematic-equities-research-lab/) | Equity factor replication, portfolio construction, and walk-forward evaluation. | `python main.py --periods 756`, `streamlit run dashboards/streamlit_app.py` |
+| 10 | [Q Quantitative Research Terminal](./terminal/) | A local terminal for equity research, portfolio backtesting, and strategy validation. | `.\setup-flagship.ps1`, `.\start-q21.ps1` |
+| 11 | [Competitive Market Intelligence Dashboard](./competitive-market-intelligence-dashboard/) | Competitor research, company filings, market prices, and news in a Streamlit dashboard. | `python run.py` |
 
 ## Core Topics
 
@@ -44,6 +49,11 @@ quant-research/
 |-- 04-quant-finance-modeling/
 |-- 05-ml-regime-trend-prediction/
 |-- student systematic futures and options venture/
+|-- multi_asset_risk_simulation/
+|-- shprite-equity-lab/
+|-- systematic-equities-research-lab/
+|-- terminal/
+|-- competitive-market-intelligence-dashboard/
 `-- README.md
 ```
 
