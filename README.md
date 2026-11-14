@@ -8,7 +8,7 @@ The repository is organized as a portfolio of independent projects. Each folder 
 
 | # | Project | Focus | Main entry points |
 |---|---|---|---|
-| 1 | [Regime-Aware Multi-Strategy System](./01-regime-aware-multi-strategy-system/) | HMM-based regime detection, dynamic allocation, momentum, mean reversion, and pairs trading backtests. | `python experiments/run_experiment.py`, `pytest tests/` |
+| 1 | [Regime-Aware Systematic Equities Trading Platform](./01-Regime-Aware-Systematic-Equities-Trading-Platform/) | Adaptive equity portfolios, walk-forward evaluation, and an HMM experiment combining momentum, mean reversion, and pairs trading. | `python scripts/run_research.py`, `python experiments/run_experiment.py` |
 | 2 | [Bayesian Statistical Arbitrage](./02-bayesian-stat-arbitrage/) | Cointegration-based spread trading with Optuna Bayesian optimization for weights and signal parameters. | `python main.py` |
 | 3 | [Options Market Making System](./03-market-making-system/) | Black-Scholes pricing, Greeks, stochastic order flow, inventory-aware quoting, delta hedging, and Python/C++ benchmarks. | `python python/market_maker.py`, `python python/benchmark.py --n 200000` |
 | 4 | [Quantitative Finance Modeling](./04-quant-finance-modeling/) | Monte Carlo risk simulation, mean-variance portfolio optimization, and ARIMA forecasting notebooks. | Project notebooks |
@@ -38,7 +38,7 @@ The repository is organized as a portfolio of independent projects. Each folder 
 
 ```text
 quant-research/
-|-- 01-regime-aware-multi-strategy-system/
+|-- 01-Regime-Aware-Systematic-Equities-Trading-Platform/
 |-- 02-bayesian-stat-arbitrage/
 |-- 03-market-making-system/
 |-- 04-quant-finance-modeling/
