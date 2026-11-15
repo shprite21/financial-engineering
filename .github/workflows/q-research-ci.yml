@@ -1,0 +1,31 @@
+name: Q research checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '05-Q-Reproducible-Strategy-Research/**'
+      - '.github/workflows/q-research-ci.yml'
+  pull_request:
+    paths:
+      - '05-Q-Reproducible-Strategy-Research/**'
+      - '.github/workflows/q-research-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: 05-Q-Reproducible-Strategy-Research/apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm run install:ci
+      - run: node --test tests/quant.test.mjs
+      - run: node node_modules/typescript/bin/tsc --noEmit --incremental false
+      - run: npm run build
